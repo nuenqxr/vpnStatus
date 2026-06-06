@@ -4,17 +4,45 @@ SwiftBar plugin สำหรับแสดงสถานะ **Azure VPN Client
 
 ## ความต้องการ
 
-- macOS + [Azure VPN Client](https://aka.ms/azvpnclientdownload)
-- [SwiftBar](https://swiftbar.app/) (`brew install --cask swiftbar`)
+- macOS 10.15 (Catalina) ขึ้นไป
+- [Azure VPN Client](https://aka.ms/azvpnclientdownload)
+- [SwiftBar](https://swiftbar.app/)
 
-## ติดตั้ง
+## ติดตั้ง SwiftBar (macOS)
+
+### วิธีที่ 1 — Homebrew (แนะนำ)
 
 ```bash
-git clone https://github.com/nuenqxr/vpnStatus.git
-chmod +x vpnStatus/azure-vpn.10s.sh
+brew install --cask swiftbar
 ```
 
-เปิด SwiftBar → เลือกโฟลเดอร์ที่ clone ไว้ (หรือ symlink ไฟล์ `.sh` เข้าโฟลเดอร์ plugin ของ SwiftBar)
+### วิธีที่ 2 — ดาวน์โหลดตรง
+
+1. เปิด [SwiftBar Releases](https://github.com/swiftbar/SwiftBar/releases/latest)
+2. ดาวน์โหลดไฟล์ `.dmg` สำหรับ Mac
+3. ลาก **SwiftBar** ไปที่โฟลเดอร์ **Applications**
+4. เปิดแอปจาก Applications (ครั้งแรก macOS อาจถามให้อนุญาต — กด **Open**)
+
+### ตั้งค่า SwiftBar ครั้งแรก
+
+1. เปิด SwiftBar จาก Menu Bar (ไอคอนรูปขีดสามขีด)
+2. เลือก **SwiftBar → Preferences…** (หรือ **Settings…**)
+3. ตั้ง **Plugin Folder** เป็นโฟลเดอร์ที่จะเก็บ plugin (เช่น `~/Documents/scripts`)
+
+## ติดตั้ง vpnStatus
+
+```bash
+git clone https://github.com/nuenqxr/vpnStatus.git ~/Documents/scripts
+chmod +x ~/Documents/scripts/azure-vpn.10s.sh
+```
+
+ถ้า **Plugin Folder** ของ SwiftBar ชี้ไปที่โฟลเดอร์อื่น ให้ clone ไปที่นั่น หรือ symlink:
+
+```bash
+ln -s ~/Documents/scripts/azure-vpn.10s.sh /path/to/your/plugin-folder/azure-vpn.10s.sh
+```
+
+ไอคอน **Dev / Prod / Off** จะโผล่บน Menu Bar ภายใน ~10 วินาที (อัปเดตอัตโนมัติจากชื่อไฟล์ `.10s`)
 
 ## ไอคอนตามสถานะ
 
