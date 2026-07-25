@@ -13,13 +13,33 @@ WAIT_DISCONNECT_SEC=30
 ICON_DIR=""
 ICON_CACHE=""
 SHOW_BAR_LABEL=true
-ICON_SIZE=70
+SHOW_BAR_IMAGE=true
+ICON_SIZE=36
 BAR_TEXT_SIZE=11
 
-ICON_OFF_FILE="icon04.icns"
-ICON_DEV_FILE="icon06.icns"
-ICON_PROD_FILE="icon13.icns"
-ICON_BOTH_FILE="icon13.icns"
+ICON_OFF_FILE="superhero_1487217.png"
+ICON_DEV_FILE="superhero_1492453.png"
+ICON_PROD_FILE="superhero_1487248.png"
+ICON_BOTH_FILE="superhero_1492453.png"
+
+ANIMATE_BAR_ICON=false
+ANIMATION_FRAME_SEC=1
+ICON_ANIMATION_FILES=(
+  "icon01.icns"
+  "icon02.icns"
+  "icon03.icns"
+  "icon04.icns"
+  "icon05.icns"
+  "icon06.icns"
+  "icon07.icns"
+  "icon08.icns"
+  "icon09.icns"
+  "icon10.icns"
+  "icon11.icns"
+  "icon12.icns"
+  "icon13.icns"
+  "icon14.icns"
+)
 
 # fallback ถ้าไม่มีไฟล์ใน icons/
 ICON_OFF="⚪"
@@ -55,18 +75,26 @@ icns_to_png() {
   [[ -f "$out" ]] && printf '%s\n' "$out"
 }
 
+raster_to_png() {
+  local src="$1"
+  local base
+  base=$(basename "$src")
+  base="${base%.*}"
+  local out="$ICON_CACHE/${base}-${ICON_SIZE}.png"
+
+  mkdir -p "$ICON_CACHE"
+  if [[ ! -f "$out" || "$src" -nt "$out" ]]; then
+    sips -s format png "$src" --out "$out" -Z "$ICON_SIZE" >/dev/null 2>&1 || return 1
+  fi
+  [[ -f "$out" ]] && printf '%s\n' "$out"
+}
+
 resolve_image_file() {
   local f="$1"
   [[ -z "$f" || ! -f "$f" ]] && return 1
   case "$f" in
     *.icns) icns_to_png "$f" ;;
-    *.png|*.jpg|*.jpeg|*.gif|*.webp)
-      if [[ "$f" == *.gif ]]; then
-        icns_to_png "$f" 2>/dev/null || return 1
-      else
-        printf '%s\n' "$f"
-      fi
-      ;;
+    *.png|*.jpg|*.jpeg|*.gif|*.webp) raster_to_png "$f" ;;
     *) return 1 ;;
   esac
 }
@@ -94,14 +122,37 @@ pick_icon_source() {
   icon_path "$file"
 }
 
+animation_icon_source() {
+  [[ "$ANIMATE_BAR_ICON" == true ]] || return 1
+
+  local frame_count="${#ICON_ANIMATION_FILES[@]}"
+  (( frame_count > 0 )) || return 1
+
+  local frame_sec="$ANIMATION_FRAME_SEC"
+  [[ "$frame_sec" =~ ^[0-9]+$ ]] || frame_sec=1
+  (( frame_sec > 0 )) || frame_sec=1
+
+  local now idx
+  now=$(date +%s)
+  idx=$(( (now / frame_sec) % frame_count ))
+  icon_path "${ICON_ANIMATION_FILES[$idx]}"
+}
+
 bar_image_param() {
   local dev_up="$1" prod_up="$2"
-  local src png b64
+  local src png b64 image_key="image"
 
-  src=$(pick_icon_source "$dev_up" "$prod_up") || return 1
+  [[ "$SHOW_BAR_IMAGE" == true ]] || return 1
+
+  src=$(animation_icon_source || pick_icon_source "$dev_up" "$prod_up") || return 1
   png=$(resolve_image_file "$src") || return 1
   b64=$(b64_encode_file "$png")
-  [[ -n "$b64" ]] && printf 'image=%s' "$b64"
+
+  if (( ! dev_up && ! prod_up )); then
+    image_key="templateImage"
+  fi
+
+  [[ -n "$b64" ]] && printf '%s=%s' "$image_key" "$b64"
 }
 
 wait_for_nc_status() {
@@ -154,7 +205,7 @@ prod_up=0
 [[ "$prod_state" == "Connected" ]] && prod_up=1
 
 bar_icon="$ICON_OFF"
-bar_text="Off"
+bar_text=""
 
 if (( dev_up && prod_up )); then
   bar_icon="$ICON_BOTH"
@@ -170,13 +221,17 @@ fi
 img_param=$(bar_image_param "$dev_up" "$prod_up" || true)
 
 if [[ -n "$img_param" ]]; then
-  if [[ "$SHOW_BAR_LABEL" == true ]]; then
+  if [[ "$SHOW_BAR_LABEL" == true && -n "$bar_text" ]]; then
     echo "${bar_text} | ${img_param} size=${BAR_TEXT_SIZE}"
   else
     echo "| ${img_param}"
   fi
 else
-  echo "${bar_icon} ${bar_text} | size=${BAR_TEXT_SIZE}"
+  if [[ -n "$bar_text" ]]; then
+    echo "${bar_icon} ${bar_text} | size=${BAR_TEXT_SIZE}"
+  else
+    echo "${bar_icon} | size=${BAR_TEXT_SIZE}"
+  fi
 fi
 
 echo "---"

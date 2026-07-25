@@ -48,16 +48,58 @@ ln -s ~/Documents/scripts/azure-vpn.10s.sh /path/to/your/plugin-folder/azure-vpn
 
 | สถานะ | ไฟล์ |
 |--------|------|
-| ไม่เชื่อมต่อ | `icons/icon04.icns` |
-| Development | `icons/icon06.icns` |
-| Production | `icons/icon13.icns` |
+| ไม่เชื่อมต่อ | `icons/superhero_1487217.png` |
+| Development | `icons/superhero_1492453.png` |
+| Production | `icons/superhero_1487248.png` |
 
 ปรับชื่อไฟล์ได้ในตัวแปร `ICON_*_FILE` ที่ต้นสคริปต์
+
+## ไอคอนแบบขยับ
+
+สคริปต์รองรับ animation แบบ RunCat โดยวนเฟรม `icons/icon01.icns` ถึง `icons/icon14.icns` แต่ปิดไว้เป็นค่าเริ่มต้น เพื่อให้ SwiftBar แสดง icon แบบ static ตามสถานะ VPN
+
+```bash
+ANIMATE_BAR_ICON=false # true = ใช้ icon animation
+ANIMATION_FRAME_SEC=1  # เปลี่ยนเฟรมทุกกี่วินาที
+```
+
+ข้อจำกัดของ SwiftBar: animation จะเปลี่ยนเฟรมตอน plugin refresh เท่านั้น ถ้าชื่อไฟล์ยังเป็น `azure-vpn.10s.sh` จะขยับทุก 10 วินาที ถ้าต้องการให้ขยับต่อเนื่องจริง ให้เปลี่ยนชื่อไฟล์ plugin เป็น `.1s.sh` เช่น `azure-vpn.1s.sh`
+
+## แสดงสถานะใน RunCat Neo
+
+RunCat Neo ใช้ Custom Metrics โดยอ่าน JSON file ที่เราเขียนไว้ สคริปต์ `runcat-vpn-metrics.sh` จะสร้างไฟล์:
+
+```bash
+~/.runcat/azure-vpn.json
+```
+
+ทดสอบเขียนไฟล์ด้วยคำสั่ง:
+
+```bash
+bash runcat-vpn-metrics.sh
+```
+
+จากนั้นเปิด RunCat Neo → Settings → Metrics → Custom Metrics → Add Custom Metrics Source แล้วเลือกไฟล์ `~/.runcat/azure-vpn.json`
+
+ถ้าต้องการให้สถานะอัปเดตอัตโนมัติทุก 10 วินาที ให้ติดตั้ง LaunchAgent:
+
+```bash
+mkdir -p ~/Library/Application\ Support/runcat-vpn-metrics
+cp runcat-vpn-metrics.sh ~/Library/Application\ Support/runcat-vpn-metrics/
+cp dev.nuenqx.runcat.azure-vpn.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/dev.nuenqx.runcat.azure-vpn.plist
+```
+
+หยุดการอัปเดต:
+
+```bash
+launchctl bootout gui/$(id -u)/dev.nuenqx.runcat.azure-vpn
+```
 
 ## ปรับแต่ง
 
 ```bash
-ICON_SIZE=24        # ขนาดไอคอนบน Menu Bar
+ICON_SIZE=36        # ขนาดไอคอนบน Menu Bar
 BAR_TEXT_SIZE=11    # ขนาดข้อความ Dev / Prod / Off
 SHOW_BAR_LABEL=true # false = แสดงเฉพาะไอคอน
 ```
