@@ -1,6 +1,6 @@
 #!/bin/bash
 # SwiftBar / xbar — Azure VPN Client (macOS)
-# ไอคอนใน icons/ (ชื่อไฟล์ปรับได้ด้านล่าง)
+# ไอคอนใน .icons/ (ชื่อไฟล์ปรับได้ด้านล่าง)
 
 #<swiftbar.refreshOnOpen>true</swiftbar.refreshOnOpen>
 
@@ -49,7 +49,7 @@ ICON_BOTH="🟣"
 
 SELF="${BASH_SOURCE[0]:-$0}"
 SELF="$(cd "$(dirname "$SELF")" && pwd)/$(basename "$SELF")"
-ICON_DIR="${ICON_DIR:-$(dirname "$SELF")/icons}"
+ICON_DIR="${ICON_DIR:-$(dirname "$SELF")/.icons}"
 ICON_CACHE="${ICON_CACHE:-$ICON_DIR/.cache}"
 
 nc_status() {
